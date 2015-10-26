@@ -174,7 +174,7 @@ def updateConfusionDict(truth, guess):
     t2 = getTone(guess)
     tone_guess_dict = {}
     
-    if t1 is not in tone_dict.keys():
+    if t1 not in tone_dict.keys():
         tone_guess_dict[t2] = 1
     else:
         tone_guess_dict = tone_dict[t1]
@@ -214,8 +214,10 @@ def collateSample(sample):
     return sources, references
 
 def printConfusionDict():
+    global confusion_dict
+    confusion_dict['Missing'] = {}
+    confusion_dict['Extra'] = {}
     keys = sorted(confusion_dict.keys()) + ['Missing', 'Extra']
-
     print '\t' + '\t'.join(keys)
 
     for k in keys:
