@@ -29,140 +29,183 @@ negligent actions or intended actions or fraudulent concealment.
 
 from sequitur_ import align
 
+confusion_dict = {}
+
 class Result:
     def __init__(self, name = None, tableFile = None):
-	self.name = name
-	self.tableFile = tableFile
-	self.nStringsTranslated = 0
-	self.nStringsFailed = 0
-	self.nSymbolsTranslated = 0
-	self.nSymbolsFailed = 0
-	self.nInsertions = 0
-	self.nDeletions = 0
-	self.nSubstitutions = 0
-	self.nStringErrors = 0
-	if self.tableFile:
-	    row = [ column for column, var in self.tableFormat if column is not None ]
-	    print >> self.tableFile, u'\t'.join(row)
+        self.name = name
+        self.tableFile = tableFile
+        self.nStringsTranslated = 0
+        self.nStringsFailed = 0
+        self.nSymbolsTranslated = 0
+        self.nSymbolsFailed = 0
+        self.nInsertions = 0
+        self.nDeletions = 0
+        self.nSubstitutions = 0
+        self.nStringErrors = 0
+        if self.tableFile:
+            row = [ column for column, var in self.tableFormat if column is not None ]
+            print >> self.tableFile, u'\t'.join(row)
 
     tableFormat = [
-	(None,      '"".join(source)'),
-	('weight',  'weight'),
-	('symbols', 'nSymbols'),
-	('ins',     'nInsertions'),
-	('del',     'nDeletions'),
-	('sub',     'nSubstitutions'),
-	('err',     'nStringErrors')]
+        (None,      '"".join(source)'),
+        ('weight',  'weight'),
+        ('symbols', 'nSymbols'),
+        ('ins',     'nInsertions'),
+        ('del',     'nDeletions'),
+        ('sub',     'nSubstitutions'),
+        ('err',     'nStringErrors')]
 
     def accu(self, source, reference, candidate, alignment, errors, weight = 1):
-	self.nStringsTranslated += weight
-	if errors > 0:
-	    self.nStringErrors += weight
-	    nStringErrors = weight
-	else:
-	    nStringErrors = 0
-	nSymbols = len(reference) * weight
-	self.nSymbolsTranslated += nSymbols
+        self.nStringsTranslated += weight
+        if errors > 0:
+            self.nStringErrors += weight
+            nStringErrors = weight
+        else:
+            nStringErrors = 0
+        nSymbols = len(reference) * weight
+        self.nSymbolsTranslated += nSymbols
 
-	nInsertions    = 0
-	nDeletions     = 0
-	nSubstitutions = 0
-	for ss, rr in alignment:
-	    if ss is None:
-		assert rr is not None
-		nInsertions += weight
-	    elif rr is None:
-		assert ss is not None
-		nDeletions += weight
-	    elif ss == rr:
-		pass
-	    else:
-		nSubstitutions += weight
-	self.nInsertions    += nInsertions
-	self.nDeletions     += nDeletions
-	self.nSubstitutions += nSubstitutions
+        nInsertions    = 0
+        nDeletions     = 0
+        nSubstitutions = 0
+        for ss, rr in alignment:
+            if ss is None:
+                assert rr is not None
+                nInsertions += weight
+            elif rr is None:
+                assert ss is not None
+                nDeletions += weight
+            elif ss == rr:
+                pass
+            else:
+                nSubstitutions += weight
+        self.nInsertions    += nInsertions
+        self.nDeletions     += nDeletions
+        self.nSubstitutions += nSubstitutions
 
-	if self.tableFile:
-	    row = [ unicode(eval(var)) for column, var in self.tableFormat ]
-	    print >> self.tableFile, u'\t'.join(row)
+        if self.tableFile:
+            row = [ unicode(eval(var)) for column, var in self.tableFormat ]
+            print >> self.tableFile, u'\t'.join(row)
 
     def accuFailure(self, reference, weight = 1):
-	self.nStringsFailed += weight
-	self.nSymbolsFailed += len(reference) * weight
+        self.nStringsFailed += weight
+        self.nSymbolsFailed += len(reference) * weight
 
     def relativeCount(self, n, total):
-	if total:
-	    return '%d (%1.2f%%)' % (n, 100.0 * float(n) / float(total))
-	else:
-	    return '%d (n/a)' % n
+        if total:
+            return '%d (%1.2f%%)' % (n, 100.0 * float(n) / float(total))
+        else:
+            return '%d (n/a)' % n
 
     stringError = property(
-	lambda self: self.relativeCount(self.nStringsIncorrect, self.nStrings))
+        lambda self: self.relativeCount(self.nStringsIncorrect, self.nStrings))
     symbolError = property(
-	lambda self: self.relativeCount(self.nSymbolsIncorrect, self.nSymbols))
+        lambda self: self.relativeCount(self.nSymbolsIncorrect, self.nSymbols))
 
     def __getattr__(self, attr):
-	if attr.startswith('rc:'):
-	    n, m = attr[3:].split('/')
-	    return self.relativeCount(getattr(self, n), getattr(self, m))
-	elif attr == 'nStrings':
-	    return self.nStringsTranslated + self.nStringsFailed
-	elif attr == 'nStringsIncorrect':
-	    return self.nStringErrors + self.nStringsFailed
-	elif attr == 'nSymbols':
-	    return self.nSymbolsTranslated + self.nSymbolsFailed
-	elif attr == 'nSymbolErrors':
-	    return self.nInsertions + self.nDeletions + self.nSubstitutions
-	elif attr == 'nSymbolsIncorrect':
-	    return self.nSymbolErrors + self.nSymbolsFailed
-	else:
-	    raise AttributeError(attr)
+        if attr.startswith('rc:'):
+            n, m = attr[3:].split('/')
+            return self.relativeCount(getattr(self, n), getattr(self, m))
+        elif attr == 'nStrings':
+            return self.nStringsTranslated + self.nStringsFailed
+        elif attr == 'nStringsIncorrect':
+            return self.nStringErrors + self.nStringsFailed
+        elif attr == 'nSymbols':
+            return self.nSymbolsTranslated + self.nSymbolsFailed
+        elif attr == 'nSymbolErrors':
+            return self.nInsertions + self.nDeletions + self.nSubstitutions
+        elif attr == 'nSymbolsIncorrect':
+            return self.nSymbolErrors + self.nSymbolsFailed
+        else:
+            raise AttributeError(attr)
 
     def __getitem__(self, key):
-	return getattr(self, key)
+        return getattr(self, key)
 
     template = """%(name)s
     total: %(nStrings)d strings, %(nSymbols)d symbols
     successfully translated: %(rc:nStringsTranslated/nStrings)s strings, %(rc:nSymbolsTranslated/nSymbols)s symbols
-	string errors:       %(rc:nStringErrors/nStringsTranslated)s
-	symbol errors:       %(rc:nSymbolErrors/nSymbolsTranslated)s
-	    insertions:      %(rc:nInsertions/nSymbolsTranslated)s
-	    deletions:       %(rc:nDeletions/nSymbolsTranslated)s
-	    substitutions:   %(rc:nSubstitutions/nSymbolsTranslated)s
+        string errors:       %(rc:nStringErrors/nStringsTranslated)s
+        symbol errors:       %(rc:nSymbolErrors/nSymbolsTranslated)s
+            insertions:      %(rc:nInsertions/nSymbolsTranslated)s
+            deletions:       %(rc:nDeletions/nSymbolsTranslated)s
+            substitutions:   %(rc:nSubstitutions/nSymbolsTranslated)s
     translation failed:      %(rc:nStringsFailed/nStrings)s strings, %(rc:nSymbolsFailed/nSymbols)s symbols
     total string errors:     %(rc:nStringsIncorrect/nStrings)s
     total symbol errors:     %(rc:nSymbolsIncorrect/nSymbols)s
     """
 
     def __str__(self):
-	return self.template % self
+        return self.template % self
 
+def updateConfusionDict(truth, guess):
+
+    try:
+        truth = truth.decode('ascii')
+        guess = guess.decode('ascii')
+    except UnicodeEncodeError:
+        return
+
+    global confusion_dict
+    
+    guess_dict = {}
+
+    if truth not in confusion_dict.keys():
+        guess_dict[guess] = 1
+    else:
+        guess_dict = confusion_dict[truth]
+        if guess not in guess_dict:
+            guess_dict[guess] = 1
+        else:
+            guess_dict[guess] = guess_dict[guess] + 1
+    
+    confusion_dict[truth] = guess_dict
 
 def showAlignedResult(source, alignment, errors, out):
     vis = []
     for ss, rr in alignment:
-	if ss is None:
-	    vis.append('\033[0;32m%s\033[0m' % rr)
-	elif rr is None:
-	    vis.append('\033[0;31m[%s]\033[0m' % ss)
-	elif ss == rr:
-	    vis.append('%s' % rr)
-	else:
-	    vis.append('\033[0;31m%s/%s\033[0m' % (rr, ss))
+        if ss is None:
+            vis.append('\033[0;32m%s\033[0m' % rr)
+            updateConfusionDict(rr, 'Missing')    
+        elif rr is None:
+            vis.append('\033[0;31m[%s]\033[0m' % ss)
+            updateConfusionDict(ss, 'Extra')
+        elif ss == rr:
+            vis.append('%s' % rr)
+            updateConfusionDict(rr, ss)
+        else:
+            vis.append('\033[0;31m%s/%s\033[0m' % (rr, ss))
+            updateConfusionDict(rr, ss)
     print >> out, u'%s\t%s\t(%d errors)' % (''.join(source), ' '.join(vis), errors)
-
 
 def collateSample(sample):
     sources = []
     references = {}
     for source, reference in sample:
-	if source in references:
-	    references[source].append(reference)
-	else:
-	    sources.append(source)
-	    references[source] = [reference]
+        if source in references:
+            references[source].append(reference)
+        else:
+            sources.append(source)
+            references[source] = [reference]
     return sources, references
 
+def printConfusionDict():
+    keys = sorted(confusion_dict.keys())
+
+    print '\t' + '\t'.join(keys)
+
+    for k in keys:
+        linestr = k + '\t'
+        guess_dict = confusion_dict[k]
+
+        for k in keys:
+            if k in guess_dict:
+                linestr += str(guess_dict[k]) + '\t'
+            else:
+                linestr += '0' + '\t'
+        
+        print linestr
 
 class Evaluator(object):
     resultFile = None
@@ -170,33 +213,35 @@ class Evaluator(object):
     verboseLog = None
 
     def setSample(self, sample):
-	self.sources, self.references = collateSample(sample)
+        self.sources, self.references = collateSample(sample)
 
     def evaluate(self, translator):
-	result = Result(tableFile = self.resultFile)
-	for source in self.sources:
-	    references = self.references[source]
-	    if self.compareFilter:
-		references = map(self.compareFilter, references)
+        result = Result(tableFile = self.resultFile)
+        for source in self.sources:
+            references = self.references[source]
+            if self.compareFilter:
+                references = map(self.compareFilter, references)
 
-	    try:
-		candidate = translator(source)
-	    except translator.TranslationFailure:
-		result.accuFailure(references[0])
-		continue
+            try:
+                candidate = translator(source)
+            except translator.TranslationFailure:
+                result.accuFailure(references[0])
+                continue
 
-	    if self.compareFilter:
-		candidate = self.compareFilter(candidate)
+            if self.compareFilter:
+                candidate = self.compareFilter(candidate)
 
-	    eval = []
-	    for reference in references:
-		alignment, errors = align(reference, candidate)
-		eval.append((errors, reference, alignment))
-	    eval.sort()
-	    errors, reference, alignment = eval[0]
+            eval = []
+            for reference in references:
+                alignment, errors = align(reference, candidate)
+                eval.append((errors, reference, alignment))
+            eval.sort()
+            errors, reference, alignment = eval[0]
 
-	    result.accu(source, reference, candidate, alignment, errors)
-	    if self.verboseLog:
-		showAlignedResult(source, alignment, errors, self.verboseLog)
+            result.accu(source, reference, candidate, alignment, errors)
+            if self.verboseLog:
+                showAlignedResult(source, alignment, errors, self.verboseLog)
 
-	return result
+
+        printConfusionDict()
+        return result
