@@ -1,0 +1,9 @@
+data/*
+Cantonese/*
+Hindi/*
+CantoneseResults/*
+test_canto*
+*.txt
+test_viet.sh
+model-*
+*.pyc
