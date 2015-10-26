@@ -217,7 +217,7 @@ def printConfusionDict():
     global confusion_dict
     confusion_dict['Missing'] = {}
     confusion_dict['Extra'] = {}
-    keys = sorted(confusion_dict.keys()) + ['Missing', 'Extra']
+    keys = sorted(confusion_dict.keys())
 
     print '\t' + '\t'.join(keys)
 
