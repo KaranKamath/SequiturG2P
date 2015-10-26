@@ -1,6 +1,8 @@
-Fixes:
+Fixes And Enhancements:
 =====
-* http://www.voxforge.org/home/forums/message-boards/audio-discussions/sequitur-g2p--symbol-out-of-range-error/2
+- http://www.voxforge.org/home/forums/message-boards/audio-discussions/sequitur-g2p--symbol-out-of-range-error/2
+- A confusion matrix is now printed out at the end to help analyse errors
+- For data with single digit tone indicators for phonemenes, --tones helps extract and print the confusion matrix for tones
 
 Original README:
 ===============
