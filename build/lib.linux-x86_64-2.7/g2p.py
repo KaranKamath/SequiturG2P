@@ -251,7 +251,7 @@ if __name__ == '__main__':
         '--stack-limit', type='int',
         help='limit size of search stack to N elements', metavar='N')
     optparser.add_option(
-        '-t', '--tones', dest='has_tones', action='store_true', default=False, help='Indicates whether the data has tones')
+        '--tones', dest='has_tones', action='store_true', default=False, help='Indicates whether the data has tones')
 
     options, args = optparser.parse_args()
 
