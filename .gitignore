@@ -1,3 +1,4 @@
+*.o
 data/*
 Cantonese/*
 Hindi/*
