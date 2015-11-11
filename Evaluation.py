@@ -146,6 +146,12 @@ def getTone(element):
     else:
         return 'None'
 
+def getBase(phoneme):
+    if phoneme[-1].isdigit():
+        return phoneme[:-1]
+    
+    return phoneme
+
 def updateConfusionDict(truth, guess):
 
     try:
@@ -170,6 +176,9 @@ def updateConfusionDict(truth, guess):
     
     confusion_dict[truth] = guess_dict
 
+    if getBase(truth) != getBase(guess):
+        return
+
     t1 = getTone(truth)
     t2 = getTone(guess)
     tone_guess_dict = {}
@@ -190,10 +199,10 @@ def showAlignedResult(source, alignment, errors, out):
     for ss, rr in alignment:
         if ss is None:
             vis.append('\033[0;32m%s\033[0m' % rr)
-            updateConfusionDict(rr, 'Missing')    
+            updateConfusionDict('Null', rr)    
         elif rr is None:
             vis.append('\033[0;31m[%s]\033[0m' % ss)
-            updateConfusionDict(ss, 'Extra')
+            updateConfusionDict(ss, 'Null')
         elif ss == rr:
             vis.append('%s' % rr)
             updateConfusionDict(rr, ss)
@@ -215,8 +224,7 @@ def collateSample(sample):
 
 def printConfusionDict():
     global confusion_dict
-    confusion_dict['Missing'] = {}
-    confusion_dict['Extra'] = {}
+    confusion_dict['Null'] = {}
     keys = sorted(confusion_dict.keys())
 
     print '\t' + '\t'.join(keys)
